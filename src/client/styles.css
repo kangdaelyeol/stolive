@@ -1,0 +1,47 @@
+.myscreen {
+    height: 200px;
+    width: 200px;
+    background-color: bisque;
+    position: relative;
+}
+
+.messagebox {
+    position: absolute;
+    padding: 5px;
+    max-width: 100px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.room__create {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.room__form {
+    width: 400px;
+    height: 200px;
+    background-color: rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.room__form span {
+    font-weight: bold;
+}
+
+.display__none {
+    display: none;
+}

@@ -27,7 +27,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 const PORT = 8000
-const rooms = []
+const rooms = {}
 
 const app = express()
 app.set('view engine', 'pug')
@@ -39,6 +39,10 @@ const server = http.createServer(app)
 const io = new Server(server)
 
 io.on('connection', (socket) => {
+    // for Test
+    socket.join('default')
+    // >>>>>>
+
     console.log('connection', socket.id)
     socket.on('error', (err) => {
         if (err && err.message === 'unauthorized event') {
@@ -55,14 +59,49 @@ io.on('connection', (socket) => {
         socket.emit('getRoom', rooms)
     })
 
-    socket.on('joinRoom', (payLoad) => {
-        const rId = getRandomBase64String(30)
-        socket.join(rId)
+    socket.on('createRoom', (payload, done) => {
+        //push room info into rooms
+        const { roomId } = payload
+        rooms[`${roomId}`] = {
+            ...payload,
+        }
+        socket.join(roomId)
+        socket.to(roomId).emit('enterRoom', { ...rooms[`${roomId}`] })
+        console.log(rooms)
+        done()
+    })
+
+    socket.on('joinRoom', (rn) => {
+        socket.join(rn)
+
+        rooms[`${rn}`].users.push(socket.id)
+
         console.log(socket.rooms)
     })
 
     socket.on('leaveRoom', (rn) => {
         socket.leave(rn)
+        rooms[`${rn}`].users = rooms[`${rn}`].users.filter((v) => {
+            return v === socket.id
+        })
+
+        // when the host leave
+        // ---> change host
+        if (rooms[`${rn}`].host === socket.id) {
+            rooms[`${rn}`].host = rooms[`${rn}`].users[0]
+        }
+
+        // when the person leaving is the last user
+        // ---> delete room
+        if (rooms[`${rn}`].users.length === 0) {
+            delete rooms[`${rn}`]
+        }
+    })
+
+    socket.on('sendMessage', (payload) => {
+        const { rn, message, user } = payload
+        console.log(rn, message)
+        socket.to(rn).emit('sendMessage', { message, user })
     })
 })
 
@@ -82,3 +121,7 @@ const getRooms = (socket) => {
 const joinRoom = (socket, id) => {
     socket.join(id)
 }
+
+
+
+// Handling webRTC

@@ -4,10 +4,15 @@ html(lang="en")
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title Document
+    link(rel="stylesheet" href="https://unpkg.com/mvp.css")
+    link(rel="stylesheet" href="client/styles.css")
   body 
     div hello bro!
-    input(class="room__num") 
+    input(type="text" class="room__num") 
     button(class="join") Join
     button(class="rooms") searchRooms
+    button(class="create") createRoom!!
+    include ./room.pug
+    include ./roomcreate.pug
     script(src="/socket.io/socket.io.js" defer)
     script(src="client/clientsocket.js" defer)
