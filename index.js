@@ -3,7 +3,6 @@ import http from 'http'
 import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import { join, dirname } from 'path'
-import { getRandomBase64String } from './src/server/fact.js'
 
 // sids: Map<SocketId, Set<Room>>
 // rooms: Map<Room, Set<SocketId>>
@@ -34,6 +33,8 @@ app.set('view engine', 'pug')
 app.set('views', join(__dirname, 'src', 'view'))
 
 app.use('/client', express.static(join(__dirname, 'src', 'client')))
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 const server = http.createServer(app)
 const io = new Server(server)
@@ -81,7 +82,7 @@ io.on('connection', (socket) => {
 
     socket.on('leaveRoom', (rn) => {
         socket.leave(rn)
-        rooms[`${rn}`].users = rooms[`${rn}`].users.filter((v) => {
+        rooms[`${rn}`].users = rooms[`${rn}`]?.users.filter((v) => {
             return v === socket.id
         })
 
@@ -109,6 +110,11 @@ app.get('/', (req, res, next) => {
     res.render('main')
 })
 
+app.post('/find', (req, res, next) => {
+    console.log(req.body)
+    return res.send.json(rooms[`${req.body.rn}`])
+})
+
 server.listen(PORT, () => {
     console.log('TLqkfazjsprtus')
 })
@@ -120,8 +126,7 @@ const getRooms = (socket) => {
 
 const joinRoom = (socket, id) => {
     socket.join(id)
+    socket.to(roomName).emit('welcome')
 }
-
-
 
 // Handling webRTC

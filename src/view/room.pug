@@ -2,6 +2,13 @@
   h1 myRoom
   div(class="screens")
     div(class="myscreen")
+  div#call
+    div#myStream
+        video#myFace(autoplay,playsinline, width="400", height="400")
+        button#mute Mute
+        button#camera Turn Camera Off
+        select#cameras
+        video#peerFace(autoplay,playsinline, width="400", height="400")
   form(class="message__form")
     input(type="text" class="message__input" placeholder="Message!")
     button(class="message__btn") send
