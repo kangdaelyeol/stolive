@@ -11,8 +11,20 @@ html(lang="en")
     input(type="text" class="room__num") 
     button(class="join") Join
     button(class="rooms") searchRooms
-    button(class="create") createRoom!!
-    include ./room.pug
+    button(class="create") createRoom!! 
+    .rooms 
+      each r in rooms
+        .room("data-rid"=r.roomId)
+          .room_titme= r.title
+          .room_des= r.description
+          .room_category
+            | #
+            =r.category
+          .room_subcategory
+            each sc in r.subCategory
+                | #
+                =sc 
+                | 
     include ./roomcreate.pug
     script(src="/socket.io/socket.io.js" defer)
-    script(src="client/clientsocket.js" defer)
+    script(src="client/main.js" defer)

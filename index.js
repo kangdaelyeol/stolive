@@ -3,30 +3,15 @@ import http from 'http'
 import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import { join, dirname } from 'path'
+import { rooms, createRoom } from './db.js'
 
 // sids: Map<SocketId, Set<Room>>
 // rooms: Map<Room, Set<SocketId>>
-
-/**
-  room: {
-    <id>: {
-        roomId: String
-        title: String
-        description: String
-        host: <socket.id>
-        users: [socket.id]
-        category: String
-        subCategory: [String]
-        createdAt:String
-    }
-   }
- */
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 const PORT = 8000
-const rooms = {}
 
 const app = express()
 app.set('view engine', 'pug')
@@ -41,7 +26,6 @@ const io = new Server(server)
 
 io.on('connection', (socket) => {
     // for Test
-    socket.join('default')
     // >>>>>>
 
     console.log('connection', socket.id)
@@ -107,12 +91,46 @@ io.on('connection', (socket) => {
 })
 
 app.get('/', (req, res, next) => {
-    res.render('main')
+    console.log(rooms)
+    const roomInfo = []
+    Object.keys(rooms).forEach((k) => {
+        roomInfo.push({ ...rooms[`${k}`] })
+    })
+    res.render('main', { rooms })
 })
 
 app.post('/find', (req, res, next) => {
     console.log(req.body)
-    return res.send.json(rooms[`${req.body.rn}`])
+    return res.json(rooms[`${req.body.rn}`])
+})
+
+app.post('/search', (req, res, next) => {
+    const query = req.body
+    const { keyword, category } = query
+    if (!keyword && !category) return res.status(200).json({ ...rooms })
+})
+
+app.post('/create', (req, res, next) => {
+    const query = req.body
+    const { title, description, category, subCategory, userName } = query
+    console.log(query);
+    const result = createRoom(title, description, userName, category, subCategory)
+    if(result)
+    return res.json(result);
+    else return res.end()
+})
+
+app.get("/room/:id", (req, res, next) => {
+    const rid = req.params.id
+    const rinfo = rooms[`${rid}`]
+    console.log(rinfo);
+    if(!rinfo)
+    return res.redirect("/");
+    else res.render("room", {rinfo})
+})
+
+app.get('/*', (req, res, next) => {
+    return res.send('123')
 })
 
 server.listen(PORT, () => {
