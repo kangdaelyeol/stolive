@@ -5,16 +5,7 @@
     position: relative;
 }
 
-.messagebox {
-    position: absolute;
-    padding: 5px;
-    max-width: 100px;
-    background-color: white;
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    font-size: 16px;
-}
+
 
 .room__create {
     position: absolute;

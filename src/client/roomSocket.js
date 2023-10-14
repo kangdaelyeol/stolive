@@ -7,10 +7,13 @@ const muteBtn = document.getElementById('mute')
 const cameraBtn = document.getElementById('camera')
 const camerasSelect = document.getElementById('cameras')
 const call = document.getElementById('call')
+const connectBtn = document.querySelector("#connect");
 
 const messageForm = document.querySelector('.message__form')
 const messageInput = document.querySelector('.message__input')
-const myScreen = document.querySelector('.myscreen')
+const myScreen = document.querySelector('.myFace')
+
+const MAX_OFFSET = 400
 
 call.hidden = true
 
@@ -22,26 +25,9 @@ let myPeerConnection
 
 socket.on('connect', () => {
     console.log('서버에 연결됨')
-
-    socket.on('sendMessage', (payload) => {
-        console.log(payload)
-    })
 })
 
 // ------ handling web rtc ----------
-
-messageForm.addEventListener('submit', (e) => {
-    e.preventDefault()
-    if (messageInput.value.trim() === '') {
-        messageInput.value = ''
-        return
-    }
-
-    const message = messageInput.value
-    messageInput.value = ''
-    sendMessage(message)
-    attachMessage(message)
-})
 
 async function getCameras() {
     try {
@@ -128,7 +114,6 @@ camerasSelect.addEventListener('input', handleCameraChange)
 // Welcome Form (join a room)
 
 async function initCall() {
-    console.log("initcall?")
     call.hidden = false
     await getMedia()
     makeConnection()
@@ -136,7 +121,8 @@ async function initCall() {
     socket.emit('join_room', roomName)
 }
 
-initCall()
+
+
 
 // socket Code
 
@@ -188,3 +174,44 @@ function handleAddStream(data) {
 }
 
 console.log('seocker')
+
+
+// message attach code
+
+const attachMessage = (message) => {
+    const messageBox = document.createElement('div')
+    const randomHorizontal = Math.random() * MAX_OFFSET
+    const randomVertical = Math.random() * MAX_OFFSET
+
+    // Set relative locaiton of messageBox
+    randomHorizontal > 200
+        ? (messageBox.style.right = `${randomHorizontal - 200}px`)
+        : (messageBox.style.left = `${randomHorizontal}px`)
+
+    randomVertical > 200
+        ? (messageBox.style.bottom = `${randomVertical - 200}px`)
+        : (messageBox.style.top = `${randomHorizontal}px`)
+
+    messageBox.className = 'messagebox'
+    messageBox.innerText = message
+    myScreen.appendChild(messageBox)
+    setTimeout(() => {
+        myScreen.removeChild(messageBox)
+    }, 1000)
+}
+
+messageForm.addEventListener('submit', (e) => {
+    e.preventDefault()
+    if (messageInput.value.trim() === '') {
+        messageInput.value = ''
+        return
+    }
+
+    const message = messageInput.value
+    messageInput.value = ''
+    attachMessage(message)
+})
+
+connectBtn.addEventListener("click", () => {
+    initCall()
+})

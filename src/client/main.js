@@ -13,32 +13,10 @@ const description = document.querySelector('.description')
 const userName = document.querySelector('.username')
 const roomCreateButton = document.querySelector('.roomcreate__button')
 
-const MAX_OFFSET = 200
-let myRoom = null
+
+
 
 // Socket Code
-
-const attachMessage = (message) => {
-    const messageBox = document.createElement('div')
-    const randomHorizontal = Math.random() * MAX_OFFSET
-    const randomVertical = Math.random() * MAX_OFFSET
-
-    // Set relative locaiton of messageBox
-    randomHorizontal > 100
-        ? (messageBox.style.right = `${randomHorizontal - 100}px`)
-        : (messageBox.style.left = `${randomHorizontal}px`)
-
-    randomVertical > 100
-        ? (messageBox.style.bottom = `${randomVertical - 100}px`)
-        : (messageBox.style.top = `${randomHorizontal}px`)
-
-    messageBox.className = 'messagebox'
-    messageBox.innerText = message
-    myScreen.appendChild(messageBox)
-    setTimeout(() => {
-        myScreen.removeChild(messageBox)
-    }, 1000)
-}
 
 const getAllRooms = async () => {
     const result = await fetch('/search', {
@@ -49,16 +27,6 @@ const getAllRooms = async () => {
     })
     const data = await result.json()
     console.log(data)
-}
-
-const sendMessage = (message) => {
-    // if(!myRoom) return;
-
-    socket.emit('sendMessage', {
-        user: socket.id,
-        rn: myRoom || 'default',
-        message: message,
-    })
 }
 
 roomsBtn.addEventListener('click', (e) => {
@@ -110,3 +78,5 @@ roomsBtn.addEventListener('click', (e) => {
     if (roomId) window.location.href = '/room/' + roomId
     else return
 })
+
+

@@ -90,11 +90,7 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('sendMessage', (payload) => {
-        const { rn, message, user } = payload
-        console.log(rn, message)
-        socket.to(rn).emit('sendMessage', { message, user })
-    })
+    
 
     // webRTC control
     socket.on('join_room', (roomName) => {
