@@ -10,7 +10,7 @@ html(lang="en")
     div hello bro!
     input(type="text" class="room__num") 
     button(class="join") Join
-    button(class="rooms") searchRooms
+    button(class="rooms__search") searchRooms
     button(class="create") createRoom!! 
     .rooms 
       each r in rooms
@@ -26,5 +26,4 @@ html(lang="en")
                 =sc 
                 | 
     include ./roomcreate.pug
-    script(src="/socket.io/socket.io.js" defer)
-    script(src="client/main.js" defer)
+    script(src="/client/main.js" defer)

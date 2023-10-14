@@ -1,5 +1,3 @@
-const socket = io.connect('http://localhost:8000')
-
 // * test
 
 const roomInput = document.querySelector('.room__num')
@@ -19,34 +17,6 @@ const MAX_OFFSET = 200
 let myRoom = null
 
 // Socket Code
-
-socket.on('welcome', async () => {
-    const offer = await myPeerConnection.createOffer()
-    myPeerConnection.setLocalDescription(offer)
-    console.log('sent the offer')
-    socket.emit('offer', offer, roomName)
-})
-
-socket.on('offer', async (offer) => {
-    console.log('received the offer')
-    myPeerConnection.setRemoteDescription(offer)
-    const answer = await myPeerConnection.createAnswer()
-    myPeerConnection.setLocalDescription(answer)
-    socket.emit('answer', answer, roomName)
-    console.log('sent the answer')
-})
-
-socket.on('answer', (answer) => {
-    console.log('received the answer')
-    myPeerConnection.setRemoteDescription(answer)
-})
-
-socket.on('ice', (ice) => {
-    console.log('received candidate')
-    myPeerConnection.addIceCandidate(ice)
-})
-
-// ----------------------- handling web rtc ---------------------
 
 const attachMessage = (message) => {
     const messageBox = document.createElement('div')
@@ -90,49 +60,6 @@ const sendMessage = (message) => {
         message: message,
     })
 }
-// -----
-
-socket.on('connect', () => {
-    console.log('서버에 연결됨')
-
-    socket.on('getRoom', (payload) => {
-        console.log('getRoomClient', payload)
-    })
-
-    socket.on('sendMessage', (payload) => {
-        console.log(payload)
-    })
-    socket.on('enterRoom', (payload) => {
-        myRoom = { ...payload }
-        // display entered room
-        enteredRoomForm.classList.remove('display__none')
-    })
-})
-
-const joinRoom = async (rn) => {
-    // if (myRoom) {
-    //     // leave room
-    //     socket.emit('leaveRoom', myRoom)
-    // }
-    const roomInfo = await fetch(`/find`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            rn,
-        }),
-    })
-    console.log(roomInfo)
-    myRoom = { ...roomInfo }
-    socket.emit('joinRoom', rn)
-}
-
-joinBtn.addEventListener('click', (e) => {
-    e.preventDefault()
-    const roomNum = roomInput.value
-    joinRoom(roomNum)
-})
 
 roomsBtn.addEventListener('click', (e) => {
     e.preventDefault()
@@ -175,4 +102,11 @@ const createRoom = async (
 createRoomBtn.addEventListener('click', () => {
     console.log('btnclick')
     roomCreateForm.classList.remove('display__none')
+})
+
+roomsBtn.addEventListener('click', (e) => {
+    const roomId = e.target.dataset.rid
+    console.log(roomId)
+    if (roomId) window.location.href = '/room/' + roomId
+    else return
 })

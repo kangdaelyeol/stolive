@@ -6,10 +6,13 @@ html(lang="en")
     title Document
     link(rel="stylesheet" href="https://unpkg.com/mvp.css")
   body 
-    .room__entered.display__none
+    .room__entered
       h1 myRoom
       div(class="screens")
         div(class="myscreen")
+        p= title
+        p= description 
+        p= roomId
       div#call
         div#myStream
             video#myFace(autoplay,playsinline, width="400", height="400")
@@ -21,4 +24,4 @@ html(lang="en")
         input(type="text" class="message__input" placeholder="Message!")
         button(class="message__btn") send
     script(src="/socket.io/socket.io.js" defer)
-    script(src="client/roomSocket.js" defer)
+    script(src="/client/roomSocket.js" defer)
