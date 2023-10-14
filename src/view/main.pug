@@ -1,0 +1,29 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Document
+    link(rel="stylesheet" href="https://unpkg.com/mvp.css")
+    link(rel="stylesheet" href="client/styles.css")
+  body 
+    div hello bro!
+    input(type="text" class="room__num") 
+    button(class="join") Join
+    button(class="rooms__search") searchRooms
+    button(class="create") createRoom!! 
+    .rooms 
+      each r in rooms
+        .room("data-rid"=r.roomId)
+          .room_titme= r.title
+          .room_des= r.description
+          .room_category
+            | #
+            =r.category
+          .room_subcategory
+            each sc in r.subCategory
+                | #
+                =sc 
+                | 
+    include ./roomcreate.pug
+    script(src="/client/main.js" defer)

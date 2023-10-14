@@ -1,0 +1,32 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Document
+    link(rel="stylesheet" href="https://unpkg.com/mvp.css")
+    link(rel="stylesheet" href="/client/room.css")
+  body 
+    .room__entered
+      h1 myRoom
+      div(class="screens")
+        div(class="myscreen")
+        p= title
+        p= description 
+        p= roomId
+      div#call
+        div#myStream
+          .streambox
+            .myFace
+              video#myFace(autoplay,playsinline, width="400", height="400")
+            .peerface
+              video#peerFace(autoplay,playsinline, width="400", height="400")
+          button#mute Mute
+          button#camera Turn Camera Off
+          select#cameras
+      form(class="message__form")
+        input(type="text" class="message__input" placeholder="Message!")
+        button(class="message__btn") send
+        button#connect connect
+    script(src="/socket.io/socket.io.js" defer)
+    script(src="/client/roomSocket.js" defer)
