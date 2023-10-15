@@ -5,7 +5,7 @@ import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import { join, dirname } from 'path'
 import { rooms, createRoom } from './db.js'
-import fs from 'fs'
+// import fs from 'fs'
 import cors from 'cors'
 
 // https SSL/TLS pem
@@ -45,55 +45,12 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('disconnect', (reason) => {
-        console.log(reason)
-    })
-
-    socket.on('getRoom', (id) => {
-        console.log('onGetRoom', id)
-        socket.emit('getRoom', rooms)
-    })
-
-    socket.on('createRoom', (payload, done) => {
-        //push room info into rooms
-        const { roomId } = payload
-        rooms[`${roomId}`] = {
-            ...payload,
-        }
-        socket.join(roomId)
-        socket.to(roomId).emit('enterRoom', { ...rooms[`${roomId}`] })
-        console.log(rooms)
-        done()
-    })
-
-    socket.on('joinRoom', (rn) => {
-        socket.join(rn)
-
-        rooms[`${rn}`].users.push(socket.id)
-
-        console.log(socket.rooms)
-    })
-
-    socket.on('leaveRoom', (rn) => {
-        socket.leave(rn)
-        rooms[`${rn}`].users = rooms[`${rn}`]?.users.filter((v) => {
-            return v === socket.id
-        })
-
-        // when the host leave
-        // ---> change host
-        if (rooms[`${rn}`].host === socket.id) {
-            rooms[`${rn}`].host = rooms[`${rn}`].users[0]
-        }
-
-        // when the person leaving is the last user
-        // ---> delete room
-        if (rooms[`${rn}`].users.length === 0) {
-            delete rooms[`${rn}`]
-        }
+    socket.on('disconnecting', (reason) => {
+        io.emit('willleave', socket.id)
     })
 
     // webRTC control
+
     socket.on('join_room', (roomName) => {
         console.log('join_Room!', roomName)
         socket.join(roomName)
@@ -111,6 +68,8 @@ io.on('connection', (socket) => {
         socket.to(receiverName).emit('ice', ice, socket.id)
     })
 })
+
+// - main / searchAPI
 
 app.get('/', (req, res, next) => {
     const roomInfo = []

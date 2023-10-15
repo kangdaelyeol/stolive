@@ -16,8 +16,6 @@ const roomCreateButton = document.querySelector('.roomcreate__button')
 
 
 
-// Socket Code
-
 const getAllRooms = async () => {
     const result = await fetch('/search', {
         method: 'POST',

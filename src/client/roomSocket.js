@@ -14,6 +14,8 @@ const messageInput = document.querySelector('.message__input')
 const myScreen = document.querySelector('.myFace')
 const streamBox = document.querySelector('.streambox')
 
+const controlForm = document.querySelector(".control__form")
+
 const MAX_OFFSET = 400
 
 call.hidden = true
@@ -22,7 +24,6 @@ let myStream
 let muted = false
 let cameraOff = false
 let roomName
-let myPeerConnection
 let peerConnections = {}
 
 // when someone emit events connecting already -> check this list and filter the offer
@@ -103,13 +104,15 @@ function handleCameraClick() {
 
 async function handleCameraChange() {
     await getMedia(camerasSelect.value)
-    if (myPeerConnection) {
-        const videoTrack = myStream.getVideoTracks()[0]
-        const videoSender = myPeerConnection
-            .getSenders()
-            .find((sender) => sender.track.kind === 'video')
-        videoSender.replaceTrack(videoTrack)
-    }
+    peerConnections.forEach((pc) => {
+        if (pc) {
+            const videoTrack = myStream.getVideoTracks()[0]
+            const videoSender = pc
+                .getSenders()
+                .find((sender) => sender.track.kind === 'video')
+            videoSender.replaceTrack(videoTrack)
+        }
+    })
 }
 
 muteBtn.addEventListener('click', handleMuteClick)
@@ -134,7 +137,6 @@ socket.on('welcome', async (senderId) => {
     const peerConnection = getRTCPeerConnection(senderId, socket.id)
     peerConnections[`${senderId}`] = peerConnection
 
-    console.log('connectedList:', connectedList)
     const offer = await peerConnections[`${senderId}`].createOffer()
     peerConnections[`${senderId}`].setLocalDescription(offer)
     console.log('sent the offer')
@@ -156,7 +158,6 @@ socket.on('offer', async (offer, senderName) => {
     const peerConnection = getRTCPeerConnection()
     peerConnections[`${senderName}`] = peerConnection
     console.log('received the offer')
-    console.log('connectedList:', connectedList)
     peerConnections[`${senderName}`].setRemoteDescription(offer)
     const answer = await peerConnections[`${senderName}`].createAnswer()
     peerConnections[`${senderName}`].setLocalDescription(answer)
@@ -198,7 +199,9 @@ const getRTCPeerConnection = (senderId, myId) => {
     peerConnection.addEventListener('icecandidate', (data) => {
         handleIce(data, senderId, myId)
     })
-    peerConnection.addEventListener('addstream', handleAddStream)
+    peerConnection.addEventListener('addstream', (data) => {
+        handleAddStream(data, senderId)
+    })
     myStream
         .getTracks()
         .forEach((track) => peerConnection.addTrack(track, myStream))
@@ -215,42 +218,69 @@ function handleIce(data, senderId, myId) {
     )
 }
 
-function handleAddStream(data) {
+function handleAddStream(data, senderId) {
     const peerFaceBox = document.createElement('div')
-    peerFaceBox.classList.add('peerface')
+    peerFaceBox.classList.add('peerface', `V_${senderId}`)
     const peerVideo = document.createElement('video')
     peerVideo.setAttribute('autoplay', 'true')
     peerVideo.setAttribute('playsinline', 'true')
-    peerVideo.setAttribute('width', '400')
-    peerVideo.setAttribute('height', '400')
+    peerVideo.setAttribute('width', MAX_OFFSET)
+    peerVideo.setAttribute('height', MAX_OFFSET)
 
     peerVideo.srcObject = data.stream
     peerFaceBox.appendChild(peerVideo)
     streamBox.appendChild(peerFaceBox)
 }
 
+// When user leave
+
+socket.on('willleave', (senderId) => {
+    console.log(senderId, 'leave')
+    handleRemoveStream(senderId)
+})
+
+function handleRemoveStream(senderId) {
+    const removeBox = document.querySelector(`.V_${senderId}`)
+    if (removeBox) {
+        const leaveBox = document.createElement('div')
+        leaveBox.classList.add('leave_box')
+        leaveBox.innerText = 'ㅠ ㅠ'
+        removeBox.appendChild(leaveBox)
+        const video = removeBox.querySelector('video')
+        console.log(video)
+        removeBox.removeChild(video)
+        setTimeout(() => {
+            streamBox.removeChild(removeBox)
+        }, 1000)
+    }
+}
+
 // message attach code
 
-const attachMessage = (message) => {
+const attachMessage = (message, peerId) => {
     const messageBox = document.createElement('div')
     const randomHorizontal = Math.random() * MAX_OFFSET
     const randomVertical = Math.random() * MAX_OFFSET
 
     // Set relative locaiton of messageBox
-    randomHorizontal > 200
-        ? (messageBox.style.right = `${randomHorizontal - 200}px`)
+    randomHorizontal > MAX_OFFSET/2
+        ? (messageBox.style.right = `${randomHorizontal - MAX_OFFSET/2}px`)
         : (messageBox.style.left = `${randomHorizontal}px`)
 
-    randomVertical > 200
-        ? (messageBox.style.bottom = `${randomVertical - 200}px`)
+    randomVertical > MAX_OFFSET/2
+        ? (messageBox.style.bottom = `${randomVertical - MAX_OFFSET/2}px`)
         : (messageBox.style.top = `${randomHorizontal}px`)
 
     messageBox.className = 'messagebox'
     messageBox.innerText = message
-    myScreen.appendChild(messageBox)
-    setTimeout(() => {
-        myScreen.removeChild(messageBox)
-    }, 1000)
+    if(peerId) {
+        
+    } else {
+        myScreen.appendChild(messageBox)
+        setTimeout(() => {
+            myScreen.removeChild(messageBox)
+        }, 1000)
+    }
 }
 
 messageForm.addEventListener('submit', (e) => {
@@ -263,6 +293,10 @@ messageForm.addEventListener('submit', (e) => {
     const message = messageInput.value
     messageInput.value = ''
     attachMessage(message)
+})
+
+controlForm.addEventListener('submit', (e) =>{
+    e.preventDefault();
 })
 
 connectBtn.addEventListener('click', () => {

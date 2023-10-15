@@ -9,11 +9,11 @@ html(lang="en")
   body 
     .room__entered
       h1 myRoom
-      div(class="screens")
-        div(class="myscreen")
-        p= title
-        p= description 
-        p= roomId
+      .screens
+        .myscreen
+          p= title
+          p= description 
+          p= roomId
       div#call
         div#myStream
           .streambox
@@ -22,9 +22,11 @@ html(lang="en")
           button#mute Mute
           button#camera Turn Camera Off
           select#cameras
-      form(class="message__form")
+      form.message__form
         input(type="text" class="message__input" placeholder="Message!")
-        button(class="message__btn") send
+        button.message__btn send
+      form.control__form
         button#connect connect
+        button#leave leave
     script(src="/socket.io/socket.io.js" defer)
     script(src="/client/roomSocket.js" defer)

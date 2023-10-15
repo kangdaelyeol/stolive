@@ -1,23 +1,39 @@
 .streambox {
-  display: flex;
+    position: relative;
+    display: flex;
 }
 
 #myStream {
-  position: relative;
+    position: relative;
 }
 
 .messagebox {
-  position: absolute;
-  padding: 5px;
-  max-width: 100px;
-  background-color: white;
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-  font-size: 16px;
+    position: absolute;
+    padding: 5px;
+    max-width: 100px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
 }
 
 .myFace {
-  background-color: rgba(0,0,0,0.1);
-  position: relative;
+    background-color: rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.leave_box {
+    position: absolute;
+    background-color: white;
+    z-index: 1;
+    width: 400px;
+    height: 400px;
+    border: 2px solid black;
+    border-radius: 5px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    font-weight: bold;
+    font-size: 40px;
 }
