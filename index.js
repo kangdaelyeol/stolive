@@ -97,16 +97,18 @@ io.on('connection', (socket) => {
     socket.on('join_room', (roomName) => {
         console.log('join_Room!', roomName)
         socket.join(roomName)
-        socket.to(roomName).emit('welcome')
+        socket.join(`${roomName}${socket.id}`)
+        socket.to(roomName).emit('welcome', socket.id)
     })
-    socket.on('offer', (offer, roomName) => {
-        socket.to(roomName).emit('offer', offer)
+    socket.on('offer', (offer, receiverName) => {
+        // 상대방 번호에 offer를 보내고 param으로 내 id 주기
+        socket.to(receiverName).emit('offer', offer, socket.id)
     })
-    socket.on('answer', (answer, roomName) => {
-        socket.to(roomName).emit('answer', answer)
+    socket.on('answer', (answer, receiverName) => {
+        socket.to(receiverName).emit('answer', answer, socket.id)
     })
-    socket.on('ice', (ice, roomName) => {
-        socket.to(roomName).emit('ice', ice)
+    socket.on('ice', (ice, receiverName) => {
+        socket.to(receiverName).emit('ice', ice, socket.id)
     })
 })
 
