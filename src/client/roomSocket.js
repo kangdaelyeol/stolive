@@ -7,11 +7,12 @@ const muteBtn = document.getElementById('mute')
 const cameraBtn = document.getElementById('camera')
 const camerasSelect = document.getElementById('cameras')
 const call = document.getElementById('call')
-const connectBtn = document.querySelector("#connect");
+const connectBtn = document.querySelector('#connect')
 
 const messageForm = document.querySelector('.message__form')
 const messageInput = document.querySelector('.message__input')
 const myScreen = document.querySelector('.myFace')
+const streamBox = document.querySelector('.streambox')
 
 const MAX_OFFSET = 400
 
@@ -117,19 +118,17 @@ async function initCall() {
     call.hidden = false
     await getMedia()
     makeConnection()
-    roomName = window.location.pathname.split("/")[2]
+    roomName = window.location.pathname.split('/')[2]
+    console.log(roomName)
     socket.emit('join_room', roomName)
 }
-
-
-
 
 // socket Code
 
 socket.on('welcome', async () => {
     const offer = await myPeerConnection.createOffer()
     myPeerConnection.setLocalDescription(offer)
-    console.log('sent the offer')
+    console.log('sent the offer', offer)
     socket.emit('offer', offer, roomName)
 })
 
@@ -139,23 +138,35 @@ socket.on('offer', async (offer) => {
     const answer = await myPeerConnection.createAnswer()
     myPeerConnection.setLocalDescription(answer)
     socket.emit('answer', answer, roomName)
-    console.log('sent the answer')
+    console.log('sent the answer', answer)
 })
 
 socket.on('answer', (answer) => {
-    console.log('received the answer')
+    console.log('received the answer', answer)
     myPeerConnection.setRemoteDescription(answer)
 })
 
 socket.on('ice', (ice) => {
-    console.log('received candidate')
+    console.log('received candidate', ice)
     myPeerConnection.addIceCandidate(ice)
 })
 
 // RTC Code
 
 function makeConnection() {
-    myPeerConnection = new RTCPeerConnection()
+    myPeerConnection = new RTCPeerConnection({
+        iceServers: [
+            {
+                urls: [
+                    'stun:stun.l.google.com:19302',
+                    'stun:stun1.l.google.com:19302',
+                    'stun:stun2.l.google.com:19302',
+                    'stun:stun3.l.google.com:19302',
+                    'stun:stun4.l.google.com:19302',
+                ],
+            },
+        ],
+    })
     myPeerConnection.addEventListener('icecandidate', handleIce)
     myPeerConnection.addEventListener('addstream', handleAddStream)
     myStream
@@ -169,12 +180,20 @@ function handleIce(data) {
 }
 
 function handleAddStream(data) {
-    const peerFace = document.getElementById('peerFace')
-    peerFace.srcObject = data.stream
+    const peerFaceBox = document.createElement('div')
+    peerFaceBox.classList.add('peerface')
+    const peerVideo = document.createElement('video')
+    peerVideo.setAttribute('autoplay', 'true')
+    peerVideo.setAttribute('playsinline', 'true')
+    peerVideo.setAttribute('width', '400')
+    peerVideo.setAttribute('height', '400')
+
+    peerVideo.srcObject = data.stream
+    peerFaceBox.appendChild(peerVideo)
+    streamBox.appendChild(peerFaceBox)
 }
 
 console.log('seocker')
-
 
 // message attach code
 
@@ -212,6 +231,6 @@ messageForm.addEventListener('submit', (e) => {
     attachMessage(message)
 })
 
-connectBtn.addEventListener("click", () => {
+connectBtn.addEventListener('click', () => {
     initCall()
 })
