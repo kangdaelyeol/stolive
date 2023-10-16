@@ -7,14 +7,12 @@ const roomsBtn = document.querySelector('.rooms')
 const createRoomBtn = document.querySelector('.create')
 
 // create Room - roomcreate.pug
-const roomCreateForm = document.querySelector('.room__create')
+const roomCreateForm = document.querySelector('.room_create')
 const title = document.querySelector('.title')
 const description = document.querySelector('.description')
-const userName = document.querySelector('.username')
-const roomCreateButton = document.querySelector('.roomcreate__button')
-
-
-
+const category = document.querySelector('.category')
+const roomCreateBtb = document.querySelector('.roomcreate__button')
+const searchBtn = document.querySelector('.room_search')
 
 const getAllRooms = async () => {
     const result = await fetch('/search', {
@@ -34,14 +32,13 @@ roomsBtn.addEventListener('click', (e) => {
 
 // CreateRoom!
 
-roomCreateButton.addEventListener('click', async () => {
-    await createRoom(title.value, description.value, userName.value)
+roomCreateBtb.addEventListener('click', async () => {
+    await createRoom(title.value, description.value, category.value)
 })
 
 const createRoom = async (
     title,
     description,
-    userName,
     category,
     subCategory,
 ) => {
@@ -53,7 +50,6 @@ const createRoom = async (
         body: JSON.stringify({
             title,
             description,
-            userName,
             category,
             subCategory,
         }),
@@ -64,6 +60,25 @@ const createRoom = async (
     console.log(data)
     window.location.href = '/room/' + data.roomId
 }
+
+const handleRoomSearch = async (e, keyword, category, subCategory) => {
+    e.preventDefault()
+    const result = await fetch('/search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            keyword,
+            category,
+            subCategory,
+        }),
+    })
+    const data = await result.json()
+    console.log(data)
+}
+
+searchBtn.addEventListener('click', handleRoomSearch)
 
 createRoomBtn.addEventListener('click', () => {
     console.log('btnclick')
@@ -76,5 +91,3 @@ roomsBtn.addEventListener('click', (e) => {
     if (roomId) window.location.href = '/room/' + roomId
     else return
 })
-
-

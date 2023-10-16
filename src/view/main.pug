@@ -9,9 +9,9 @@ html(lang="en")
   body 
     div hello bro!
     input(type="text" class="room__num") 
-    button(class="join") Join
-    button(class="rooms__search") searchRooms
-    button(class="create") createRoom!! 
+    button.join Join
+    button.room_search searchRooms
+    button.create createRoom!! 
     .rooms 
       each r in rooms
         .room("data-rid"=r.roomId)

@@ -5,8 +5,9 @@
         roomId: String
         title: String
         description: String
-        host: userName
-        users: [userName]
+        hostsession: <sid>
+        hostname: <userName>
+        users: [<sid>]
         category: String
         subCategory: [String]
         createdAt:String
@@ -16,7 +17,7 @@
 
 export const rooms = {
     r123: {
-        roomId: "r123",
+        roomId: 'r123',
         title: 'Title',
         description: 'des',
         category: 'Study', // temp
@@ -25,58 +26,91 @@ export const rooms = {
 }
 
 export const getAllRooms = () => {
-    return { ...rooms }
-}
-
-export const getRoomsByKeyword = (keyword) => {
-    const data = {}
-    const kw = keyword.trim().split(' ')
-    const searched = []
-
-    // keyword -> find
-    Object.keys(rooms).forEach((v) => {
-        kw.forEach((k) => {
-            if (rooms[`${v}`].title.includes(k) && !searched.includes(v))
-                searched.push(v)
-        })
+    const data = []
+    Object.keys(rooms).forEach((k) => {
+        data.push(rooms[`${k}`])
     })
-
-    searched.forEach((k) => {
-        data[`${k}`] = { ...rooms[`${k}`] }
-    })
-
     return data
 }
 
-export const getRoomsByCategory = (category) => {
-    const data = {}
-
+export const getRoomsByQuery = (keyword, category, subCategory) => {
+    const data = []
+    const searched = new Set()
+    // keyword -> find
     Object.keys(rooms).forEach((v) => {
-        if (rooms[`${v}`].category === category) {
-            data[`${v}`] = { ...rooms[`${v}`] }
+        if (keyword) {
+            const kw = keyword.trim().split(' ')
+            kw.forEach((k) => {
+                if (rooms[`${v}`].title.includes(k)) searched.add(v)
+            })
+        }
+        if (category) {
+            if (rooms[`${v}`].category === category) searched.add(v)
+        }
+        if (subCategory) {
+            subCategory.forEach((sc) => {
+                if (rooms[`${v}`].subCategory.includes(sc)) searched.add(v)
+            })
         }
     })
 
+    searched.forEach((k) => {
+        data.push(rooms[`${k}`])
+    })
+
     return data
 }
 
-export const createRoom = (title, description, userName, category, subCategory) => {
-    const roomId = String(Date.now())
+export const createRoom = (title, description, category, subCategory) => {
+    const roomId = `R_${String(Date.now())}`
     const roomInfo = {
-        host: userName,
+        hostsession: '',
+        hostname: '',
         title,
         description,
         category: category || 'abc', // temp
         subCategory: subCategory || ['s', 'u', 'b'], // temp
         roomId,
         createdAt: new Date().toDateString(),
-        users: [userName],
+        users: [],
     }
-    rooms[roomId] = { ...roomInfo }
+    rooms[`${roomId}`] = { ...roomInfo }
     return roomInfo
 }
 
+export const joinRoom = (roomId, userSid, userName) => {
+    rooms[`${roomId}`].users.push(userSid)
+    if (rooms[`${roomId}`].hostname === '') {
+        rooms[`${roomId}`].hostsession = userSid
+        rooms[`${roomId}`].hostname = userName
+    }
+    console.log(rooms[`${roomId}`])
+    return rooms[`${roomId}`]
+}
+
 export const updateRoom = (roomInfo) => {
-    rooms[`${roomInfo.roomId}`] = { ...roomInfo }
+    const prev = rooms[`${roomInfo.roomId}`]
+    rooms[`${roomInfo.roomId}`] = { ...prev, ...roomInfo }
     return { ...roomInfo }
+}
+
+export const leaveRoom = (roomId, userSid, userName) => {
+    console.log(rooms[`${roomId}`].hostsession, userSid)
+    console.log(rooms[`${roomId}`].hostname, userName)
+    // 나 혼자 있는 경우
+    if (rooms[`${roomId}`].users.length === 1) {
+        delete rooms[`${roomId}`]
+        return true
+    } else if (
+        rooms[`${roomId}`].users.length !== 1 &&
+        rooms[`${roomId}`].hostsession === userSid
+    ) {
+        // 호스트가 나간 경우
+        // 두 번째 유저가 호스트
+        rooms[`${roomId}`].hostsession === rooms[`${roomId}`][1]
+    } else {
+        rooms[`${roomId}`].users.pop(userSid)
+    }
+    console.log(rooms)
+    return true
 }

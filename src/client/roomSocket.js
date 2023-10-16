@@ -1,5 +1,8 @@
 const socket = io.connect()
 
+// temp userName
+const username = `USER_${Date.now()}`
+
 // entered Room - room.pug
 const enteredRoomForm = document.querySelector('.room__entered')
 const myFace = document.getElementById('myface')
@@ -126,7 +129,7 @@ async function initCall() {
     // getMedia -> set mystream
     await getMedia()
     roomName = window.location.pathname.split('/')[2]
-    socket.emit('join_room', roomName)
+    socket.emit('join_room', roomName, socket.id, username)
 }
 
 // socket Code
@@ -237,6 +240,10 @@ function handleAddStream(data, senderId) {
 socket.on('willleave', (senderId) => {
     console.log(senderId, 'leave')
     handleRemoveStream(senderId)
+})
+
+socket.on("disconnecting", () => {
+    socket.emit("abc", "message", socket.id)
 })
 
 const handleRemoveStream = (senderId) => {

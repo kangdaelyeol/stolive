@@ -4,7 +4,15 @@ import https from 'https'
 import { Server } from 'socket.io'
 import { fileURLToPath } from 'url'
 import { join, dirname } from 'path'
-import { rooms, createRoom } from './db.js'
+import {
+    rooms,
+    createRoom,
+    leaveRoom,
+    getRoomsByQuery,
+    getAllRooms,
+    updateRoom,
+    joinRoom,
+} from './db.js'
 // import fs from 'fs'
 import cors from 'cors'
 
@@ -40,7 +48,6 @@ const io = new Server(server, {
 })
 
 io.on('connection', (socket) => {
-
     console.log('connection', socket.id)
     socket.on('error', (err) => {
         if (err && err.message === 'unauthorized event') {
@@ -51,19 +58,33 @@ io.on('connection', (socket) => {
     // Client
 
     socket.on('disconnecting', (reason) => {
-        io.emit('willleave', socket.id)
+        console.log(
+            'disconnecting',
+            socket.id,
+            socket.data.roomName,
+            socket.data.userName,
+        )
+        leaveRoom(
+            socket.data.roomName,
+            socket.data.userSid,
+            socket.data.userName,
+        )
+        io.emit('willleave', socket.id, socket.rooms)
     })
 
-    socket.on("message", (roomName, senderId, message) => {
-        socket.to(roomName).emit("message", senderId, message)
+    socket.on('message', (roomName, senderId, message) => {
+        socket.to(roomName).emit('message', senderId, message)
     })
 
     // webRTC control
 
-    socket.on('join_room', (roomName) => {
-        console.log('join_Room!', socket.id)
+    socket.on('join_room', (roomName, userSid, userName) => {
         socket.join(roomName)
         socket.join(`${roomName}${socket.id}`)
+        socket.data.roomName = roomName
+        socket.data.userSid = userSid
+        socket.data.userName = userName
+        joinRoom(roomName, userSid, userName)
         socket.to(roomName).emit('welcome', socket.id)
     })
     socket.on('offer', (offer, receiverName) => {
@@ -86,10 +107,7 @@ io.on('connection', (socket) => {
 // - main / searchAPI
 
 app.get('/', (req, res, next) => {
-    const roomInfo = []
-    Object.keys(rooms).forEach((k) => {
-        roomInfo.push({ ...rooms[`${k}`] })
-    })
+    const rooms = getAllRooms()
     res.render('main', { rooms })
 })
 
@@ -100,11 +118,9 @@ app.post('/find', (req, res, next) => {
 
 app.post('/search', (req, res, next) => {
     const query = req.body
-    const { keyword, category } = query
-    if (!keyword && !category) return res.status(200).json({ ...rooms })
-    else {
-        
-    }
+    const { keyword, category, subCategory } = query
+    const data = getRoomsByQuery(keyword, category, subCategory)
+    return res.status(200).json(data)
 })
 
 app.post('/create', (req, res, next) => {
@@ -118,8 +134,14 @@ app.post('/create', (req, res, next) => {
         category,
         subCategory,
     )
-    if (result) return res.json(result)
+    if (result) return res.status(200).json(result)
     else return res.end()
+})
+
+app.post('/leave', (req, res, next) => {
+    const query = req.body
+    const { roomId, userName } = query
+    leaveRoom(roomId, userName)
 })
 
 app.get('/room/:id', (req, res, next) => {
@@ -137,4 +159,3 @@ app.get('/*', (req, res, next) => {
 server.listen(PORT, () => {
     console.log('TLqkfazjsprtus')
 })
-
