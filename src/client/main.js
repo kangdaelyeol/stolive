@@ -1,7 +1,6 @@
 // * test
 
 const roomInput = document.querySelector('.room__num')
-const joinBtn = document.querySelector('.join')
 const roomsBtn = document.querySelector('.rooms')
 
 const createRoomBtn = document.querySelector('.create')
@@ -12,7 +11,6 @@ const title = document.querySelector('.title')
 const description = document.querySelector('.description')
 const category = document.querySelector('.category')
 const roomCreateBtb = document.querySelector('.roomcreate__button')
-const searchBtn = document.querySelector('.room_search')
 
 const getAllRooms = async () => {
     const result = await fetch('/search', {
@@ -78,7 +76,6 @@ const handleRoomSearch = async (e, keyword, category, subCategory) => {
     console.log(data)
 }
 
-searchBtn.addEventListener('click', handleRoomSearch)
 
 createRoomBtn.addEventListener('click', () => {
     console.log('btnclick')

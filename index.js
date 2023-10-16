@@ -73,17 +73,21 @@ io.on('connection', (socket) => {
     })
 
     socket.on('message', (roomName, senderId, message) => {
+        console.log('message', senderId, message)
         socket.to(roomName).emit('message', senderId, message)
     })
 
     // webRTC control
 
     socket.on('join_room', (roomName, userSid, userName) => {
+        console.log('joinRoom', socket.id)
         socket.join(roomName)
         socket.join(`${roomName}${socket.id}`)
+        // 들어간 방 / 내 정보 등록
         socket.data.roomName = roomName
         socket.data.userSid = userSid
         socket.data.userName = userName
+        // 룸 db정보 등록
         joinRoom(roomName, userSid, userName)
         socket.to(roomName).emit('welcome', socket.id)
     })
@@ -109,11 +113,6 @@ io.on('connection', (socket) => {
 app.get('/', (req, res, next) => {
     const rooms = getAllRooms()
     res.render('main', { rooms })
-})
-
-app.post('/find', (req, res, next) => {
-    console.log(req.body)
-    return res.json(rooms[`${req.body.rn}`])
 })
 
 app.post('/search', (req, res, next) => {
@@ -156,6 +155,6 @@ app.get('/*', (req, res, next) => {
     return res.send('123')
 })
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log('TLqkfazjsprtus')
 })

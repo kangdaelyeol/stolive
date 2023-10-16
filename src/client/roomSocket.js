@@ -10,7 +10,6 @@ const muteBtn = document.getElementById('mute')
 const cameraBtn = document.getElementById('camera')
 const camerasSelect = document.getElementById('cameras')
 const call = document.getElementById('call')
-const connectBtn = document.querySelector('#connect')
 
 const messageForm = document.querySelector('.message__form')
 const messageInput = document.querySelector('.message__input')
@@ -32,7 +31,8 @@ let peerConnections = {}
 // when someone emit events connecting already -> check this list and filter the offer
 const connectedList = []
 
-socket.on('connect', () => {
+socket.on('connect', async () => {
+    await initCall()
     console.log('서버에 연결됨')
 })
 
@@ -75,7 +75,7 @@ async function getMedia(deviceId) {
             await getCameras()
         }
     } catch (e) {
-        console.log(e)
+        console.log('no getMedia', e)
     }
 }
 
@@ -137,39 +137,26 @@ async function initCall() {
 socket.on('welcome', async (senderId) => {
     // Welcome -> 처음 온 사람만 보냄
     // senderId -> 처음 온 사람의 Id -> 그 아이디에 대한 peerConnection 처리
-    const peerConnection = getRTCPeerConnection(senderId, socket.id)
+    const peerConnection = getRTCPeerConnection(senderId)
     peerConnections[`${senderId}`] = peerConnection
 
     const offer = await peerConnections[`${senderId}`].createOffer()
     peerConnections[`${senderId}`].setLocalDescription(offer)
     console.log('sent the offer')
-    // offer -> 나의 개인 room을 보낸다
-    // 상대방 Id + 내 Id
-    console.log(offer)
-    socket.emit(
-        'offer',
-        offer,
-        `${roomName}${senderId}`,
-        `${roomName}${socket.id}`,
-    )
+    socket.emit('offer', offer, `${roomName}${senderId}`)
 })
 
-socket.on('offer', async (offer, senderName) => {
+socket.on('offer', async (offer, senderId) => {
     // 받은 id == 상대방의 id
 
-    // 나는 처음와서 roomJoin 보내고 offer 받음
-    const peerConnection = getRTCPeerConnection()
-    peerConnections[`${senderName}`] = peerConnection
+    // 나는 처음와서 roomJoin 보내고 있던 상대는 offer 받음
+    const peerConnection = getRTCPeerConnection(senderId)
+    peerConnections[`${senderId}`] = peerConnection
     console.log('received the offer')
-    peerConnections[`${senderName}`].setRemoteDescription(offer)
-    const answer = await peerConnections[`${senderName}`].createAnswer()
-    peerConnections[`${senderName}`].setLocalDescription(answer)
-    socket.emit(
-        'answer',
-        answer,
-        `${roomName}${senderName}`,
-        `${roomName}${socket.id}`,
-    )
+    peerConnections[`${senderId}`].setRemoteDescription(offer)
+    const answer = await peerConnections[`${senderId}`].createAnswer()
+    peerConnections[`${senderId}`].setLocalDescription(answer)
+    socket.emit('answer', answer, `${roomName}${senderId}`)
     console.log('sent the answer')
 })
 
@@ -179,13 +166,13 @@ socket.on('answer', (answer, senderName) => {
 })
 
 socket.on('ice', (ice, senderName) => {
-    console.log('received candidate', ice)
+    console.log('received ice candidate')
     peerConnections[`${senderName}`].addIceCandidate(ice)
 })
 
 // create RTC Code --welcome--
 
-const getRTCPeerConnection = (senderId, myId) => {
+const getRTCPeerConnection = (senderId) => {
     const peerConnection = new RTCPeerConnection({
         iceServers: [
             {
@@ -200,7 +187,7 @@ const getRTCPeerConnection = (senderId, myId) => {
         ],
     })
     peerConnection.addEventListener('icecandidate', (data) => {
-        handleIce(data, senderId, myId)
+        handleIce(data, senderId)
     })
     peerConnection.addEventListener('addstream', (data) => {
         handleAddStream(data, senderId)
@@ -211,17 +198,13 @@ const getRTCPeerConnection = (senderId, myId) => {
     return peerConnection
 }
 
-function handleIce(data, senderId, myId) {
+function handleIce(data, senderId) {
     console.log('sent candidate')
-    socket.emit(
-        'ice',
-        data.candidate,
-        `${roomName}${senderId}`,
-        `${roomName}${myId}`,
-    )
+    socket.emit('ice', data.candidate, `${roomName}${senderId}`)
 }
 
 function handleAddStream(data, senderId) {
+    console.log('addStream for : ', senderId)
     const peerFaceBox = document.createElement('div')
     peerFaceBox.classList.add('peerface', `V_${senderId}`)
     const peerVideo = document.createElement('video')
@@ -240,10 +223,6 @@ function handleAddStream(data, senderId) {
 socket.on('willleave', (senderId) => {
     console.log(senderId, 'leave')
     handleRemoveStream(senderId)
-})
-
-socket.on("disconnecting", () => {
-    socket.emit("abc", "message", socket.id)
 })
 
 const handleRemoveStream = (senderId) => {
@@ -265,7 +244,6 @@ const handleRemoveStream = (senderId) => {
 // message attach code
 
 const attachMessage = (message, peerId) => {
-    console.log(message, peerId)
     const messageBox = document.createElement('div')
     const randomHorizontal = Math.random() * MAX_OFFSET
     const randomVertical = Math.random() * MAX_OFFSET
@@ -282,12 +260,14 @@ const attachMessage = (message, peerId) => {
     messageBox.className = 'messagebox'
     messageBox.innerText = message
     if (peerId) {
+        console.log(message, peerId)
         const peerBox = document.querySelector(`.V_${peerId}`)
         peerBox.appendChild(messageBox)
         setTimeout(() => {
             peerBox.removeChild(messageBox)
         }, 1000)
     } else {
+        console.log(message, 'my message')
         myScreen.appendChild(messageBox)
         setTimeout(() => {
             myScreen.removeChild(messageBox)
@@ -314,8 +294,4 @@ socket.on('message', (senderId, message) => {
 
 controlForm.addEventListener('submit', (e) => {
     e.preventDefault()
-})
-
-connectBtn.addEventListener('click', () => {
-    initCall()
 })

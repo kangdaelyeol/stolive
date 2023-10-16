@@ -15,15 +15,7 @@
    }
  */
 
-export const rooms = {
-    r123: {
-        roomId: 'r123',
-        title: 'Title',
-        description: 'des',
-        category: 'Study', // temp
-        subCategory: ['s', 'u', 'b'], // temp
-    },
-}
+export const rooms = {}
 
 export const getAllRooms = () => {
     const data = []
