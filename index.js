@@ -32,11 +32,14 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 
 const server = http.createServer(app)
-const io = new Server(server)
+const io = new Server(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+    },
+})
 
 io.on('connection', (socket) => {
-    // for Test
-    // >>>>>>
 
     console.log('connection', socket.id)
     socket.on('error', (err) => {
@@ -45,23 +48,34 @@ io.on('connection', (socket) => {
         }
     })
 
+    // Client
+
     socket.on('disconnecting', (reason) => {
         io.emit('willleave', socket.id)
+    })
+
+    socket.on("message", (roomName, senderId, message) => {
+        socket.to(roomName).emit("message", senderId, message)
     })
 
     // webRTC control
 
     socket.on('join_room', (roomName) => {
-        console.log('join_Room!', roomName)
+        console.log('join_Room!', socket.id)
         socket.join(roomName)
         socket.join(`${roomName}${socket.id}`)
         socket.to(roomName).emit('welcome', socket.id)
     })
     socket.on('offer', (offer, receiverName) => {
         // 상대방 번호에 offer를 보내고 param으로 내 id 주기
+        console.log('offer-receiverName:', receiverName)
+        console.log('myName:', socket.id)
+
         socket.to(receiverName).emit('offer', offer, socket.id)
     })
     socket.on('answer', (answer, receiverName) => {
+        console.log('answer-receiverName:', receiverName)
+        console.log('myName:', socket.id)
         socket.to(receiverName).emit('answer', answer, socket.id)
     })
     socket.on('ice', (ice, receiverName) => {
@@ -88,6 +102,9 @@ app.post('/search', (req, res, next) => {
     const query = req.body
     const { keyword, category } = query
     if (!keyword && !category) return res.status(200).json({ ...rooms })
+    else {
+        
+    }
 })
 
 app.post('/create', (req, res, next) => {
@@ -121,4 +138,3 @@ server.listen(PORT, () => {
     console.log('TLqkfazjsprtus')
 })
 
-// Handling webRTC

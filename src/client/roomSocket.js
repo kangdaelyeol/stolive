@@ -1,8 +1,8 @@
-const socket = io.connect('http://localhost:8000')
+const socket = io.connect()
 
 // entered Room - room.pug
 const enteredRoomForm = document.querySelector('.room__entered')
-const myFace = document.getElementById('myFace')
+const myFace = document.getElementById('myface')
 const muteBtn = document.getElementById('mute')
 const cameraBtn = document.getElementById('camera')
 const camerasSelect = document.getElementById('cameras')
@@ -11,10 +11,10 @@ const connectBtn = document.querySelector('#connect')
 
 const messageForm = document.querySelector('.message__form')
 const messageInput = document.querySelector('.message__input')
-const myScreen = document.querySelector('.myFace')
+const myScreen = document.querySelector('.myface')
 const streamBox = document.querySelector('.streambox')
 
-const controlForm = document.querySelector(".control__form")
+const controlForm = document.querySelector('.control__form')
 
 const MAX_OFFSET = 400
 
@@ -142,6 +142,7 @@ socket.on('welcome', async (senderId) => {
     console.log('sent the offer')
     // offer -> 나의 개인 room을 보낸다
     // 상대방 Id + 내 Id
+    console.log(offer)
     socket.emit(
         'offer',
         offer,
@@ -154,7 +155,6 @@ socket.on('offer', async (offer, senderName) => {
     // 받은 id == 상대방의 id
 
     // 나는 처음와서 roomJoin 보내고 offer 받음
-
     const peerConnection = getRTCPeerConnection()
     peerConnections[`${senderName}`] = peerConnection
     console.log('received the offer')
@@ -232,14 +232,14 @@ function handleAddStream(data, senderId) {
     streamBox.appendChild(peerFaceBox)
 }
 
-// When user leave
+// user leave
 
 socket.on('willleave', (senderId) => {
     console.log(senderId, 'leave')
     handleRemoveStream(senderId)
 })
 
-function handleRemoveStream(senderId) {
+const handleRemoveStream = (senderId) => {
     const removeBox = document.querySelector(`.V_${senderId}`)
     if (removeBox) {
         const leaveBox = document.createElement('div')
@@ -258,23 +258,28 @@ function handleRemoveStream(senderId) {
 // message attach code
 
 const attachMessage = (message, peerId) => {
+    console.log(message, peerId)
     const messageBox = document.createElement('div')
     const randomHorizontal = Math.random() * MAX_OFFSET
     const randomVertical = Math.random() * MAX_OFFSET
 
     // Set relative locaiton of messageBox
-    randomHorizontal > MAX_OFFSET/2
-        ? (messageBox.style.right = `${randomHorizontal - MAX_OFFSET/2}px`)
+    randomHorizontal > MAX_OFFSET / 2
+        ? (messageBox.style.right = `${randomHorizontal - MAX_OFFSET / 2}px`)
         : (messageBox.style.left = `${randomHorizontal}px`)
 
-    randomVertical > MAX_OFFSET/2
-        ? (messageBox.style.bottom = `${randomVertical - MAX_OFFSET/2}px`)
+    randomVertical > MAX_OFFSET / 2
+        ? (messageBox.style.bottom = `${randomVertical - MAX_OFFSET / 2}px`)
         : (messageBox.style.top = `${randomHorizontal}px`)
 
     messageBox.className = 'messagebox'
     messageBox.innerText = message
-    if(peerId) {
-        
+    if (peerId) {
+        const peerBox = document.querySelector(`.V_${peerId}`)
+        peerBox.appendChild(messageBox)
+        setTimeout(() => {
+            peerBox.removeChild(messageBox)
+        }, 1000)
     } else {
         myScreen.appendChild(messageBox)
         setTimeout(() => {
@@ -293,10 +298,15 @@ messageForm.addEventListener('submit', (e) => {
     const message = messageInput.value
     messageInput.value = ''
     attachMessage(message)
+    socket.emit('message', roomName, socket.id, message)
 })
 
-controlForm.addEventListener('submit', (e) =>{
-    e.preventDefault();
+socket.on('message', (senderId, message) => {
+    attachMessage(message, senderId)
+})
+
+controlForm.addEventListener('submit', (e) => {
+    e.preventDefault()
 })
 
 connectBtn.addEventListener('click', () => {
