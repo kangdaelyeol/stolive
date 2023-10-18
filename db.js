@@ -71,6 +71,8 @@ export const createRoom = (title, description, category, subCategory) => {
 }
 
 export const joinRoom = (roomId, userSid, userName) => {
+    // handleException - 없는 방 입장 할때 - false
+    if (!rooms[`${roomId}`]) return false
     rooms[`${roomId}`].users.push(userSid)
     if (rooms[`${roomId}`].hostname === '') {
         rooms[`${roomId}`].hostsession = userSid
@@ -87,9 +89,12 @@ export const updateRoom = (roomInfo) => {
 }
 
 export const leaveRoom = (roomId, userSid, userName) => {
-    console.log(rooms[`${roomId}`].hostsession, userSid)
-    console.log(rooms[`${roomId}`].hostname, userName)
-    // 나 혼자 있는 경우
+    // roomId -> roomName
+    // userName -> userName not sessionId
+    if(!rooms[`${roomId}`]) return false
+    console.log('leaveRoom', rooms, userSid, userName)
+
+    // 나 혼자 있는 경우  
     if (rooms[`${roomId}`].users.length === 1) {
         delete rooms[`${roomId}`]
         return true
@@ -103,6 +108,6 @@ export const leaveRoom = (roomId, userSid, userName) => {
     } else {
         rooms[`${roomId}`].users.pop(userSid)
     }
-    console.log(rooms)
+    console.log('rooms after leaveRoom:', rooms)
     return true
 }

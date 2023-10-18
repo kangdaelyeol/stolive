@@ -237,7 +237,7 @@ const handleRemoveStream = (senderId) => {
         removeBox.removeChild(video)
         setTimeout(() => {
             streamBox.removeChild(removeBox)
-        }, 1000)
+        }, 2000)
     }
 }
 

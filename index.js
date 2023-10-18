@@ -88,7 +88,12 @@ io.on('connection', (socket) => {
         socket.data.userSid = userSid
         socket.data.userName = userName
         // 룸 db정보 등록
-        joinRoom(roomName, userSid, userName)
+        const result = joinRoom(roomName, userSid, userName)
+        if (!result) {
+            socket.leave(roomName)
+            socket.leave(`${roomName}${socket.id}`)
+            return socket.to(roomName).emit('welcome', false)
+        } else
         socket.to(roomName).emit('welcome', socket.id)
     })
     socket.on('offer', (offer, receiverName) => {
