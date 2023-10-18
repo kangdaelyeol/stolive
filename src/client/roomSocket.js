@@ -1,7 +1,8 @@
 const socket = io.connect()
-
 // temp userName
 const username = `USER_${Date.now()}`
+
+const IceQueue = []
 
 // entered Room - room.pug
 const enteredRoomForm = document.querySelector('.room__entered')
@@ -167,7 +168,17 @@ socket.on('answer', (answer, senderName) => {
 
 socket.on('ice', (ice, senderName) => {
     console.log('received ice candidate')
-    peerConnections[`${senderName}`].addIceCandidate(ice)
+    if (!peerConnections[`${senderName}`]) {
+        IceQueue.push(ice)
+        return
+    } else if (IceQueue.length !== 0) {
+        const queueLength = IceQueue.length
+        for (let i = 0; i < queueLength; i++) {
+            peerConnections[`${senderName}`]?.addIceCandidate(IceQueue[0])
+            IceQueue.shift()
+        }
+    }
+    peerConnections[`${senderName}`]?.addIceCandidate(ice)
 })
 
 // create RTC Code --welcome--
