@@ -15,7 +15,9 @@
    }
  */
 
-export const rooms = {}
+export const rooms = {
+
+}
 
 export const getAllRooms = () => {
     const data = []
@@ -43,6 +45,9 @@ export const getRoomsByQuery = (keyword, category, subCategory) => {
             subCategory.forEach((sc) => {
                 if (rooms[`${v}`].subCategory.includes(sc)) searched.add(v)
             })
+        }
+        if (!keyword && !category && !subCategory) {
+            searched.add(v)
         }
     })
 
@@ -91,10 +96,10 @@ export const updateRoom = (roomInfo) => {
 export const leaveRoom = (roomId, userSid, userName) => {
     // roomId -> roomName
     // userName -> userName not sessionId
-    if(!rooms[`${roomId}`]) return false
+    if (!rooms[`${roomId}`]) return false
     console.log('leaveRoom', rooms, userSid, userName)
 
-    // 나 혼자 있는 경우  
+    // 나 혼자 있는 경우
     if (rooms[`${roomId}`].users.length === 1) {
         delete rooms[`${roomId}`]
         return true

@@ -34,12 +34,7 @@ roomCreateBtb.addEventListener('click', async () => {
     await createRoom(title.value, description.value, category.value)
 })
 
-const createRoom = async (
-    title,
-    description,
-    category,
-    subCategory,
-) => {
+const createRoom = async (title, description, category, subCategory) => {
     const result = await fetch('/create', {
         method: 'POST',
         headers: {
@@ -75,7 +70,6 @@ const handleRoomSearch = async (e, keyword, category, subCategory) => {
     const data = await result.json()
     console.log(data)
 }
-
 
 createRoomBtn.addEventListener('click', () => {
     console.log('btnclick')

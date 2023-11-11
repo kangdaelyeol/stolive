@@ -89,12 +89,15 @@ io.on('connection', (socket) => {
         socket.data.userName = userName
         // 룸 db정보 등록
         const result = joinRoom(roomName, userSid, userName)
+        console.log(result)
         if (!result) {
             socket.leave(roomName)
             socket.leave(`${roomName}${socket.id}`)
             return socket.to(roomName).emit('welcome', false)
-        } else
-        socket.to(roomName).emit('welcome', socket.id)
+        } else {
+            console.log('send welcome to', socket.id)
+            socket.to(roomName).emit('welcome', socket.id)
+        }
     })
     socket.on('offer', (offer, receiverName) => {
         // 상대방 번호에 offer를 보내고 param으로 내 id 주기
@@ -161,5 +164,5 @@ app.get('/*', (req, res, next) => {
 })
 
 server.listen(PORT, '0.0.0.0', () => {
-    console.log('TLqkfazjsprtus')
+    console.log('connection ghffltlt! - PORT:', PORT)
 })

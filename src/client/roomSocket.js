@@ -1,4 +1,6 @@
-const socket = io.connect()
+const socket = io.connect(
+    'https://b290-2001-2d8-7008-e1b9-b1bf-14d4-9752-2456.ngrok-free.app',
+)
 // temp userName
 const username = `USER_${Date.now()}`
 
