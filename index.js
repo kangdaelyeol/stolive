@@ -12,6 +12,7 @@ import {
     getAllRooms,
     updateRoom,
     joinRoom,
+    getRoomById,
 } from './db.js'
 // import fs from 'fs'
 import cors from 'cors'
@@ -132,8 +133,7 @@ app.post('/search', (req, res, next) => {
 
 app.post('/create', (req, res, next) => {
     const query = req.body
-    const { title, description, category, subCategory, userName } = query
-    console.log(query)
+    const { title, description, category, subCategory, userName } = query.data
     const result = createRoom(
         title,
         description,
@@ -149,6 +149,12 @@ app.post('/leave', (req, res, next) => {
     const query = req.body
     const { roomId, userName } = query
     leaveRoom(roomId, userName)
+})
+
+app.post('/roominfo', (req, res, next) => {
+    const query = req.body
+    const result = getRoomById(query.roomid);
+    return res.status(200).json(result)
 })
 
 app.get('/room/:id', (req, res, next) => {

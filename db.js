@@ -15,9 +15,7 @@
    }
  */
 
-export const rooms = {
-
-}
+export const rooms = {}
 
 export const getAllRooms = () => {
     const data = []
@@ -25,6 +23,13 @@ export const getAllRooms = () => {
         data.push(rooms[`${k}`])
     })
     return data
+}
+
+export const getRoomById = (roomId) => {
+    console.log('roomName', roomId)
+    if (rooms[roomId]) {
+        return rooms[roomId]
+    } else return false
 }
 
 export const getRoomsByQuery = (keyword, category, subCategory) => {
@@ -58,15 +63,25 @@ export const getRoomsByQuery = (keyword, category, subCategory) => {
     return data
 }
 
-export const createRoom = (title, description, category, subCategory) => {
+export const createRoom = (
+    title,
+    description,
+    userName,
+    category,
+    subCategory,
+) => {
+    console.log(subCategory)
     const roomId = `R_${String(Date.now())}`
     const roomInfo = {
         hostsession: '',
-        hostname: '',
-        title,
-        description,
+        hostname: userName,
+        title: title || 'No Title',
+        description: description || 'No Description',
         category: category || 'abc', // temp
-        subCategory: subCategory || ['s', 'u', 'b'], // temp
+        subCategory: subCategory
+            .trim()
+            .split('#')
+            .map((v) => v.trim()) || ['s', 'u', 'b'], // temp
         roomId,
         createdAt: new Date().toDateString(),
         users: [],
@@ -102,6 +117,7 @@ export const leaveRoom = (roomId, userSid, userName) => {
     // 나 혼자 있는 경우
     if (rooms[`${roomId}`].users.length === 1) {
         delete rooms[`${roomId}`]
+        console.log('나 혼자 방에 있음, 나가짐', rooms)
         return true
     } else if (
         rooms[`${roomId}`].users.length !== 1 &&
@@ -111,7 +127,9 @@ export const leaveRoom = (roomId, userSid, userName) => {
         // 두 번째 유저가 호스트
         rooms[`${roomId}`].hostsession === rooms[`${roomId}`][1]
     } else {
+        console.log('before', rooms)
         rooms[`${roomId}`].users.pop(userSid)
+        console.log('after', rooms)
     }
     console.log('rooms after leaveRoom:', rooms)
     return true
