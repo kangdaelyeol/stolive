@@ -14,6 +14,8 @@ import {
     joinRoom,
     getRoomById,
 } from './db.js'
+import './mongo/mongodb.js'
+
 // import fs from 'fs'
 import cors from 'cors'
 
@@ -153,7 +155,8 @@ app.post('/leave', (req, res, next) => {
 
 app.post('/roominfo', (req, res, next) => {
     const query = req.body
-    const result = getRoomById(query.roomid);
+    const result = getRoomById(query.roomid)
+    console.log(result)
     return res.status(200).json(result)
 })
 
@@ -167,6 +170,11 @@ app.get('/room/:id', (req, res, next) => {
 
 app.get('/*', (req, res, next) => {
     return res.send('123')
+})
+
+app.post('/createuser', (req, res, _) => {
+    const userData = req.body
+    console.log(userData)
 })
 
 server.listen(PORT, '0.0.0.0', () => {

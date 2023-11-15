@@ -3,3 +3,4 @@
 /.prettierrc
 *.pem
 .history
+.env
