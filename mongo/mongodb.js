@@ -1,4 +1,5 @@
 import { MongoClient, ServerApiVersion } from 'mongodb'
+import mongoose from 'mongoose'
 import dotenv from "dotenv"
 
 dotenv.config();
@@ -18,6 +19,7 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect()
+        await mongoose.connect(uri)
         // Send a ping to confirm a successful connection
         await client.db('admin').command({ ping: 1 })
         console.log(

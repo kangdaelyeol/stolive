@@ -14,7 +14,9 @@ import {
     joinRoom,
     getRoomById,
 } from './db.js'
+import { postCreateUser, postDeleteUser, postUpdateUser } from './mongoController.js'
 import './mongo/mongodb.js'
+
 
 // import fs from 'fs'
 import cors from 'cors'
@@ -172,10 +174,9 @@ app.get('/*', (req, res, next) => {
     return res.send('123')
 })
 
-app.post('/createuser', (req, res, _) => {
-    const userData = req.body
-    console.log(userData)
-})
+app.post('/createuser', postCreateUser)
+app.post('/updateuser', postUpdateUser)
+app.post('/deleteuser', postDeleteUser)
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log('connection ghffltlt! - PORT:', PORT)
