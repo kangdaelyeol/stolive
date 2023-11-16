@@ -1,4 +1,4 @@
-import User from './mongo/model/user.js'
+import User from '../mongo/model/user.js'
 import bcrypt from 'bcrypt'
 
 const SALT_ROUND = 10

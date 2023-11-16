@@ -14,9 +14,16 @@ import {
     joinRoom,
     getRoomById,
 } from './db.js'
-import { postCreateUser, postDeleteUser, postUpdateUser } from './mongoController.js'
+import {
+    postCreateUser,
+    postDeleteUser,
+    postUpdateUser,
+} from './controllers/mongoController.js'
+import { postUserLogin, postCheckJwt } from './controllers/controller.js'
 import './mongo/mongodb.js'
 
+// GLOBAL VARIABLE
+const Hour = 3600000
 
 // import fs from 'fs'
 import cors from 'cors'
@@ -39,6 +46,7 @@ const app = express()
 app.set('view engine', 'pug')
 app.set('views', join(__dirname, 'src', 'view'))
 
+// middleWare
 app.use('/client', express.static(join(__dirname, 'src', 'client')))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -174,9 +182,12 @@ app.get('/*', (req, res, next) => {
     return res.send('123')
 })
 
+
 app.post('/createuser', postCreateUser)
 app.post('/updateuser', postUpdateUser)
 app.post('/deleteuser', postDeleteUser)
+app.post('/login', postUserLogin)
+app.post("/checkjwt", postCheckJwt)
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log('connection ghffltlt! - PORT:', PORT)
