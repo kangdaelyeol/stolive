@@ -182,12 +182,12 @@ app.get('/*', (req, res, next) => {
     return res.send('123')
 })
 
-
 app.post('/createuser', postCreateUser)
 app.post('/updateuser', postUpdateUser)
 app.post('/deleteuser', postDeleteUser)
+app.post('/updateuser', postUpdateUser)
 app.post('/login', postUserLogin)
-app.post("/checkjwt", postCheckJwt)
+app.post('/checkjwt', postCheckJwt)
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log('connection ghffltlt! - PORT:', PORT)
