@@ -19,8 +19,16 @@ import {
     postDeleteUser,
     postUpdateUser,
 } from './controllers/mongoController.js'
-import { postUserLogin, postCheckJwt } from './controllers/controller.js'
+import {
+    postUserLogin,
+    postCheckJwt,
+    postUploadProfile,
+    postDeleteProfile,
+} from './controllers/controller.js'
 import './mongo/mongodb.js'
+import multer from 'multer'
+
+const upload = multer({ dest: 'upload/' })
 
 // GLOBAL VARIABLE
 const Hour = 3600000
@@ -188,7 +196,8 @@ app.post('/deleteuser', postDeleteUser)
 app.post('/updateuser', postUpdateUser)
 app.post('/login', postUserLogin)
 app.post('/checkjwt', postCheckJwt)
-
+app.post('/uploadprofile', upload.single('avatar'), postUploadProfile)
+app.post('/deleteprofile', postDeleteProfile)
 server.listen(PORT, '0.0.0.0', () => {
     console.log('connection ghffltlt! - PORT:', PORT)
 })
