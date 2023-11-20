@@ -74,3 +74,26 @@ export const postDeleteProfile = async (req, res) => {
     const result = await cloudinaryDestroy(fileName)
     return res.status(200).json(result)
 }
+
+
+export const uploadTempProfile = (req, res) => {
+    const data = req.file
+    const srcPath = '/' + data.path
+    return res.status(200).json({ data: srcPath })
+}
+
+export const deleteTempProfile = async (req, res) => {
+    const { fileUrl } = req.body
+    const fileName = path.basename(fileUrl)
+    const deletePath = path.resolve(__dirname, '..', 'uploads', fileName)
+    try {
+        console.log('remove :', deletePath)
+        fs.unlinkSync(deletePath)
+        return res.status(200)
+    } catch (e) {
+        return res.status(400).json({
+            status: false,
+            message: e,
+        })
+    }
+}

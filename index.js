@@ -24,6 +24,8 @@ import {
     postCheckJwt,
     postUploadProfile,
     postDeleteProfile,
+    deleteTempProfile,
+    uploadTempProfile,
 } from './controllers/controller.js'
 import './mongo/mongodb.js'
 import upload from './upload.js'
@@ -196,8 +198,8 @@ app.post('/deleteuser', postDeleteUser)
 app.post('/updateuser', postUpdateUser)
 app.post('/login', postUserLogin)
 app.post('/checkjwt', postCheckJwt)
-app.post('/uploadprofile', upload.single('avatar'), postUploadProfile)
-app.post('/deleteprofile', postDeleteProfile)
+app.post('/uploadtempprofile', upload.single('avatar'), uploadTempProfile)
+app.post('/deletetempprofile', deleteTempProfile)
 server.listen(PORT, '0.0.0.0', () => {
     console.log('connection ghffltlt! - PORT:', PORT)
 })

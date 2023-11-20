@@ -4,4 +4,4 @@
 *.pem
 .history
 .env
-/upload
+/uploads
