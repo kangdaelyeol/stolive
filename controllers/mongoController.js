@@ -16,9 +16,21 @@ export const postCreateUser = async (req, res, next) => {
     try {
         const result = await User.create(newUser)
         console.log('result Create User', result)
+        const { userName, nickName, hb, email, age, profile } = result
+        const userData = {
+            userName,
+            nickName,
+            hb,
+            age,
+            profile,
+            email,
+        }
+
+        const JToken = createToken(userData)
         return res.status(201).json({
             status: true,
-            data: result,
+            data: userData,
+            jwt: JToken,
         })
     } catch (e) {
         console.log('error Create User', e)
@@ -44,13 +56,15 @@ export const postUpdateUser = async (req, res, next) => {
             newUser,
             { new: true },
         )
+
+        const { userName, nickName, age, hb, email, profile } = data
         const userData = {
-            userName: data.userName,
-            nickName: data.nickName,
-            age: data.age,
-            hb: data.hb,
-            email: data.email,
-            profile: data.profile,
+            userName,
+            nickName,
+            age,
+            hb,
+            email,
+            profile,
         }
         const JToken = createToken(userData)
         console.log(userData)
