@@ -26,9 +26,8 @@ import {
     postDeleteProfile,
 } from './controllers/controller.js'
 import './mongo/mongodb.js'
-import multer from 'multer'
+import upload from './upload.js'
 
-const upload = multer({ dest: 'upload/' })
 
 // GLOBAL VARIABLE
 const Hour = 3600000
@@ -56,6 +55,7 @@ app.set('views', join(__dirname, 'src', 'view'))
 
 // middleWare
 app.use('/client', express.static(join(__dirname, 'src', 'client')))
+app.use('/uploads', express.static(join(__dirname, 'uploads')))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cors())

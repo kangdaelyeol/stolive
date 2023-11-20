@@ -23,12 +23,15 @@ export const cloudinaryUpload = async (data) => {
     }
 }
 
-export const cloudinaryDestroy = async (publicId) => {
-  try {
-    const result = await cloudinary.uploader.destroy(publicId, {resource_type: "image"})
-    return result;
-  } catch(e) {
-    console.log(e)
-    return false;
-  }
+export const cloudinaryDestroy = async (fileName) => {
+    const publicName = 'uploads/' + fileName
+    try {
+        const result = await cloudinary.uploader.destroy(publicName, {
+            resource_type: 'image',
+        })
+        return result
+    } catch (e) {
+        console.log(e)
+        return false
+    }
 }
