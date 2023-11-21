@@ -1,6 +1,8 @@
 import User from '../mongo/model/user.js'
 import bcrypt from 'bcrypt'
 import { createToken } from '../jwtAuth.js'
+import { cloudinaryDestroy, cloudinaryUpload } from '../cloudinary.js'
+import path from 'path'
 
 const SALT_ROUND = 10
 
@@ -15,7 +17,6 @@ export const postCreateUser = async (req, res, next) => {
     delete newUser.pw
     try {
         const result = await User.create(newUser)
-        console.log('result Create User', result)
         const { userName, nickName, hb, email, age, profile } = result
         const userData = {
             userName,
@@ -42,23 +43,29 @@ export const postCreateUser = async (req, res, next) => {
 }
 
 export const postUpdateUser = async (req, res, next) => {
-    const bodyData = req.body.data
-    const newpw = await bcrypt.hash(bodyData.pw, SALT_ROUND)
-    const newUser = {
-        ...bodyData,
-        password: newpw,
-    }
-    console.log(newUser)
-    delete newUser.pw
-    try {
-        const data = await User.findOneAndUpdate(
-            { userName: bodyData.userName },
-            newUser,
-            { new: true },
-        )
+    const { userData, formData } = req.body
+    const newpw = await bcrypt.hash(userData.pw, SALT_ROUND)
+    const profileUrl = await cloudinaryUpload(formData)
 
-        const { userName, nickName, age, hb, email, profile } = data
-        const userData = {
+    const newUser = {
+        ...userData,
+        password: newpw,
+        profile: profileUrl,
+    }
+
+    delete newUser.pw
+
+    try {
+        // delete prev file in Cloudinary
+        const data = await User.findOneAndUpdate(
+            { userName: userData.userName },
+            newUser,
+        )
+        const prevProfileName = path.basename(data.profile)
+        const result = await cloudinaryDestroy(prevProfileName)
+        console.log('delete Cloudinary :', prevProfileName, result)
+        const { userName, nickName, age, hb, email, profile } = newUser
+        const user = {
             userName,
             nickName,
             age,
@@ -66,11 +73,8 @@ export const postUpdateUser = async (req, res, next) => {
             email,
             profile,
         }
-        const JToken = createToken(userData)
-        console.log(userData)
-        return res
-            .status(200)
-            .json({ status: true, data: userData, jwt: JToken })
+        const JToken = createToken(user)
+        return res.status(200).json({ status: true, data: user, jwt: JToken })
     } catch (e) {
         console.log(e)
         return res.status(400).json({ status: false, data: '홀리싯' })
@@ -78,5 +82,5 @@ export const postUpdateUser = async (req, res, next) => {
 }
 
 export const postDeleteUser = async (req, res, next) => {
-    const bodyData = req.body.data
+    const data = req.body.data
 }

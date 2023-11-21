@@ -22,14 +22,11 @@ import {
 import {
     postUserLogin,
     postCheckJwt,
-    postUploadProfile,
-    postDeleteProfile,
     deleteTempProfile,
     uploadTempProfile,
 } from './controllers/controller.js'
 import './mongo/mongodb.js'
 import upload from './upload.js'
-
 
 // GLOBAL VARIABLE
 const Hour = 3600000
@@ -188,18 +185,19 @@ app.get('/room/:id', (req, res, next) => {
     else res.render('room', { ...rinfo })
 })
 
-app.get('/*', (req, res, next) => {
-    return res.send('123')
-})
 
 app.post('/createuser', postCreateUser)
 app.post('/updateuser', postUpdateUser)
 app.post('/deleteuser', postDeleteUser)
-app.post('/updateuser', postUpdateUser)
 app.post('/login', postUserLogin)
 app.post('/checkjwt', postCheckJwt)
 app.post('/uploadtempprofile', upload.single('avatar'), uploadTempProfile)
 app.post('/deletetempprofile', deleteTempProfile)
+
+app.get('/*', (req, res, next) => {
+    return res.send('123')
+})
+
 server.listen(PORT, '0.0.0.0', () => {
     console.log('connection ghffltlt! - PORT:', PORT)
 })

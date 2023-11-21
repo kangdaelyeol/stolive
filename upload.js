@@ -15,7 +15,7 @@ const upload = multer({
             cb(null, 'uploads/')
         },
         filename: (req, file, cb) => {
-            cb(null, new Date().valueOf() + path.extname(file.originalname))
+            cb(null, Date.now() + path.extname(file.originalname))
         },
     }),
 })

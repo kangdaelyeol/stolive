@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary'
 import dotenv from 'dotenv'
+import path from 'path'
 dotenv.config()
 
 cloudinary.config({
@@ -9,14 +10,13 @@ cloudinary.config({
     secure: true,
 })
 
-export const cloudinaryUpload = async (data) => {
+export const cloudinaryUpload = async (formData) => {
     try {
-        const result = await cloudinary.uploader.upload(data.path, {
+        const result = await cloudinary.uploader.upload(formData.path, {
             resource_type: 'image',
-            public_id: data.path,
+            public_id: formData.path,
         })
-        console.log(result)
-        return result
+        return result.url
     } catch (e) {
         console.log(e)
         return false
@@ -24,7 +24,10 @@ export const cloudinaryUpload = async (data) => {
 }
 
 export const cloudinaryDestroy = async (fileName) => {
-    const publicName = 'uploads/' + fileName
+    // cloudinary set ext automaticaly except for original file name\
+    // so it needs to trim ext name set by cloudinary
+    const extName = path.extname(fileName)
+    const publicName = 'uploads/' + path.basename(fileName, extName)
     try {
         const result = await cloudinary.uploader.destroy(publicName, {
             resource_type: 'image',

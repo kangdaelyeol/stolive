@@ -44,42 +44,12 @@ export const postCheckJwt = (req, res, next) => {
     }
 }
 
-export const postUploadProfile = async (req, res) => {
-    const data = req.file
-    console.log(data)
-
-    // try {
-    //     const result = await cloudinaryUpload(data)
-    //     console.log(result)
-    //     const filePath = path.join(RootPath, 'uploads', data.filename)
-    //     fs.unlink(filePath, (err) => {
-    //         console.log(err)
-    //     })
-    //     return res.status(200).json({
-    //         url: result.url,
-    //     })
-    // } catch (e) {
-    //     console.log(e)
-    //     return res.status(400).json(e)
-    // }
-
-    console.log(data)
-    const srcPath = 'http://localhost:8000' + '/' + data.path
-    return res.status(200).json({ data: srcPath })
-}
-
-export const postDeleteProfile = async (req, res) => {
-    // remove BinaryData with fs.unlink
-    const { fileName } = req.body
-    const result = await cloudinaryDestroy(fileName)
-    return res.status(200).json(result)
-}
 
 
 export const uploadTempProfile = (req, res) => {
     const data = req.file
     const srcPath = '/' + data.path
-    return res.status(200).json({ data: srcPath })
+    return res.status(200).json({ data: srcPath, formData: data })
 }
 
 export const deleteTempProfile = async (req, res) => {
@@ -88,7 +58,7 @@ export const deleteTempProfile = async (req, res) => {
     const deletePath = path.resolve(__dirname, '..', 'uploads', fileName)
     try {
         console.log('remove :', deletePath)
-        fs.unlinkSync(deletePath)
+        fs.existsSync(deletePath) && fs.unlinkSync(deletePath)
         return res.status(200)
     } catch (e) {
         return res.status(400).json({
