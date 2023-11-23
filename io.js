@@ -34,10 +34,6 @@ export default function IoServer(server) {
             io.emit('willleave', socket.id, socket.rooms)
         })
 
-        socket.on('message', (roomName, senderId, message) => {
-            console.log('message', senderId, message)
-            socket.to(roomName).emit('message', senderId, message)
-        })
 
         // webRTC control
 
@@ -79,6 +75,11 @@ export default function IoServer(server) {
         })
         socket.on('ice', (ice, receiverName) => {
             socket.to(receiverName).emit('ice', ice, socket.id)
+        })
+
+        socket.on('message', (roomName, message, cb) => {
+            socket.to(roomName).emit('message', message)
+            cb()
         })
     })
     return io

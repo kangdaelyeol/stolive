@@ -45,8 +45,9 @@ export const postCreateUser = async (req, res, next) => {
 export const postUpdateUser = async (req, res, next) => {
     const { userData, formData } = req.body
     const newpw = await bcrypt.hash(userData.pw, SALT_ROUND)
+    console.log("formData",formData)
     const profileUrl = await cloudinaryUpload(formData)
-
+    console.log("profileURL:", profileUrl)
     const newUser = {
         ...userData,
         password: newpw,
@@ -54,7 +55,7 @@ export const postUpdateUser = async (req, res, next) => {
     }
 
     delete newUser.pw
-
+    console.log("userData", userData)
     try {
         // delete prev file in Cloudinary
         const data = await User.findOneAndUpdate(
