@@ -16,7 +16,7 @@ import IoServer from './io.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const PORT = 8000
+const PORT = process.env.PORT || 8000
 
 const app = express()
 
@@ -33,10 +33,10 @@ app.use(cors())
 const server = http.createServer(app)
 const io = IoServer(server)
 
-app.get('/', (req, res, next) => {
-    const rooms = getAllRooms()
-    res.render('main', { rooms })
-})
+// app.get('/', (req, res, next) => {
+//     const rooms = getAllRooms()
+//     res.render('main', { rooms })
+// })
 
 app.get('/room/:id', (req, res, next) => {
     const rid = req.params.id
@@ -56,6 +56,6 @@ app.get('/*', (req, res, next) => {
     return res.send('123')
 })
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, () => {
     console.log('connection ghffltlt! - PORT:', PORT)
 })
