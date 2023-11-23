@@ -98,7 +98,6 @@ export const joinRoom = (roomId, userSid, userName) => {
         rooms[`${roomId}`].hostsession = userSid
         rooms[`${roomId}`].hostname = userName
     }
-    console.log(rooms[`${roomId}`])
     return rooms[`${roomId}`]
 }
 
@@ -134,4 +133,3 @@ export const leaveRoom = (roomId, userSid, userName) => {
     console.log('rooms after leaveRoom:', rooms)
     return true
 }
-
